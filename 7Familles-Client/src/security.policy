@@ -1,0 +1,8 @@
+ 
+grant {
+	permission java.security.AllPermission;
+};
+  
+grant codeBase "file:/home/asao/Documents/Universite/Semestre9/Middlewares/7Families/SevenFamilies/bin" {
+    permission java.security.AllPermission;
+};
