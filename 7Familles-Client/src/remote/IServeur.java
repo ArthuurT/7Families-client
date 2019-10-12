@@ -2,8 +2,11 @@ package remote;
 
 import java.rmi.Remote;
 import java.rmi.RemoteException;
+import java.util.Map;
 
 public interface IServeur extends Remote {
 	
-	public IJeu join(IJoueur joueur) throws RemoteException;
+	public boolean creerJeu(String nom) throws RemoteException;
+	
+	public Map<String, IJeu> listerJeux() throws RemoteException;
 }

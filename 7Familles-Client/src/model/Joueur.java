@@ -5,6 +5,7 @@ import java.rmi.RemoteException;
 import java.rmi.server.UnicastRemoteObject;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 import remote.IJoueur;
 
@@ -26,9 +27,11 @@ public class Joueur extends UnicastRemoteObject implements IJoueur, Serializable
 	}
 
 	@Override
-	public Carte demander(Carte expected) throws RemoteException {
-		// TODO Auto-generated method stub
-		return null;
+	public Carte demander(Famille famille, Statut statut) throws RemoteException {
+		Optional<Carte> carte = this.main.stream().filter((Carte c) -> {
+			return c.getFamille().equals(famille) && c.getStatut().equals(statut);
+		}).findFirst();
+		return carte.isPresent() ? carte.get() : null;
 	}
 
 	@Override
