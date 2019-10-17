@@ -31,7 +31,11 @@ public class Joueur extends UnicastRemoteObject implements IJoueur, Serializable
 		Optional<Carte> carte = this.main.stream().filter((Carte c) -> {
 			return c.getFamille().equals(famille) && c.getStatut().equals(statut);
 		}).findFirst();
-		return carte.isPresent() ? carte.get() : null;
+		if (carte.isPresent()) {
+			this.main.remove(carte.get());
+			return carte.get();
+		}
+		return null;
 	}
 
 	@Override
@@ -60,6 +64,28 @@ public class Joueur extends UnicastRemoteObject implements IJoueur, Serializable
 	
 	public List<Carte> getMain() {
 		return this.main;
+	}
+	
+	public List<IJoueur> getOpposants() {
+		return this.opposants;
+	}
+
+	public boolean possiblePoserFamille(Carte carte) {
+		Long nbCartes = this.main
+			.stream()
+			.filter((Carte c) -> carte.getFamille().equals(c.getFamille()))
+			.count();
+		if (nbCartes == 6) {
+			this.main.removeIf((Carte c) -> carte.getFamille().equals(c.getFamille()));
+			this.familles.addFamille(carte.getFamille());
+			return true;
+		}
+		return false;
+	}
+	
+	@Override
+	public String pseudo() throws RemoteException {
+		return this.pseudo;
 	}
 
 }

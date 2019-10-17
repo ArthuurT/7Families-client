@@ -1,19 +1,24 @@
 package remote;
 
+import java.rmi.Remote;
 import java.rmi.RemoteException;
 
 import exception.GameFullException;
 import model.Carte;
-import model.Famille;
-import model.Statut;
 
-public interface IJeu {
-
+public interface IJeu extends Remote {
+	
 	public void rejoindre(IJoueur joueur) throws RemoteException, GameFullException;
 	
-	public void jouer(IJoueur joueur) throws RemoteException, InterruptedException;
+	public void jouer(IJoueur joueur) throws RemoteException;
 	
-	public Carte piocher(Famille famille, Statut satut) throws RemoteException;
+	public Carte piocher() throws RemoteException;
+	
+	public void passerTour() throws RemoteException;
 	
 	public boolean finPartie() throws RemoteException;
+	
+	public IJoueur getGagnant() throws RemoteException;
+	
+	public void quitter(IJoueur joueur) throws RemoteException;
 }

@@ -11,6 +11,8 @@ import model.Statut;
 
 public interface IJoueur extends Remote {
 	
+	public String pseudo() throws RemoteException;
+	
 	public void donner(Carte carte) throws RemoteException;
 	
 	public void donner(List<Carte> cartes) throws RemoteException;

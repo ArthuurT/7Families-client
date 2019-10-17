@@ -27,4 +27,9 @@ public class Carte implements Serializable {
 	public String getNom() {
 		return nom;
 	}
+	
+	@Override
+	public String toString() {
+		return String.format("{Famille: %s, Statut: %s, Nom: %s}", this.famille, this.statut, this.nom);
+	}
 }
