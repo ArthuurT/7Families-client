@@ -18,7 +18,7 @@ public interface IJeu extends Remote {
 	
 	public boolean finPartie() throws RemoteException;
 	
-	public IJoueur getGagnant() throws RemoteException;
+	public boolean estGagnant(IJoueur joueur) throws RemoteException;
 	
 	public void quitter(IJoueur joueur) throws RemoteException;
 }

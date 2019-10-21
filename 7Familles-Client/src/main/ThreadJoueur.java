@@ -96,8 +96,7 @@ public class ThreadJoueur extends Thread {
 				System.out.println("J'ai terminé mon tour");
 			}
 			System.out.println("Partie terminé");
-			IJoueur gagnant = jeu.getGagnant();
-			if (((IJoueur)joueur).equals(gagnant)) {
+			if (jeu.estGagnant(joueur)) {
 				System.err.println("Vous avez gagné !");
 			} else {
 				System.err.println("Vous avez perdu");
