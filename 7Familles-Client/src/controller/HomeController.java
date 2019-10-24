@@ -28,6 +28,10 @@ public class HomeController implements Initializable {
 	
 	private IServeur server;
 	
+	public HomeController(IServeur server) {
+		this.server = server;
+	}
+	
 	@Override
 	public void initialize(URL location, ResourceBundle resources) {}
 	
@@ -40,7 +44,7 @@ public class HomeController implements Initializable {
 			// Create a FXMLLoader instance
 			FXMLLoader loader = new FXMLLoader(getClass().getResource("../view/ServerList.fxml"));
 			// Create a SelectServerController instance
-	        SelectServerController controller = new SelectServerController(this.server.listerJeux());
+	        SelectServerController controller = new SelectServerController(this.server.listerJeux(),this);
 	        // Set it in the FXMLLoader
 	        loader.setController(controller);
 
@@ -51,9 +55,4 @@ public class HomeController implements Initializable {
 	        stage.setScene(scene);
 	        
 	}
-	
-	public void setServer(IServeur server) {
-		this.server = server;
-	}
-
 }
