@@ -10,7 +10,7 @@ import java.rmi.registry.Registry;
 import java.util.Properties;
 
 import remote.IServeur;
-import view.FenetreAccueil;
+import view.Fenetre;
 
 public class Lauch {
 	
@@ -39,7 +39,7 @@ public class Lauch {
 			// Recover the RMI Server instance
 			IServeur serveur = (IServeur) registry.lookup(serverInterface);
 			
-			FenetreAccueil fenetre = new FenetreAccueil();
+			Fenetre fenetre = new Fenetre(serveur);
 			
 			fenetre.setVisible(true);
 			

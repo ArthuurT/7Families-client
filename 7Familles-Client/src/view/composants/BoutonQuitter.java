@@ -1,22 +1,22 @@
-package view;
+package view.composants;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
 import javax.swing.JButton;
 
-public class BoutonSelectionServeurs extends JButton implements ActionListener{
+public class BoutonQuitter extends JButton implements ActionListener {
 	
 	private static final long serialVersionUID = 1L;
 
-	public BoutonSelectionServeurs() {
+
+	public BoutonQuitter() {
 		this.addActionListener(this);
-		this.setText("Selection des serveurs");
+		this.setText("Quitter");
 	}
 
 	@Override
 	public void actionPerformed(ActionEvent e) {
-		// TODO Change window	
+		System.exit(0);
 	}
-
 }
