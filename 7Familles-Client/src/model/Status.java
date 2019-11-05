@@ -1,6 +1,6 @@
 package model;
 
-public enum Statut {
+public enum Status {
 	Grand_father,
 	Grand_mother,
 	Father,

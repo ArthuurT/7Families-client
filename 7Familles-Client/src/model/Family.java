@@ -1,6 +1,6 @@
 package model;
 
-public enum Famille {
+public enum Family {
 	Stark,
 	Barbapapa,
 	Uzumaki,

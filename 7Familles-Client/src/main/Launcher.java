@@ -9,9 +9,9 @@ import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 import java.util.Properties;
 
-import remote.IServeur;
+import remote.IServer;
 
-public class Lanceur {
+public class Launcher {
 
 	public static void main(String[] args) {
 		try {
@@ -31,16 +31,14 @@ public class Lanceur {
 			String serverInterface = properties.getProperty("server.interface");
 			
 			Registry registry = LocateRegistry.getRegistry(port);
-			IServeur serveur = (IServeur) registry.lookup(serverInterface);
-			new ThreadJoueur(serveur).start();
+			IServer serveur = (IServer) registry.lookup(serverInterface);
+			new ThreadPlayer(serveur).start();
 			
 		} catch (RemoteException | NotBoundException e) {
 			e.printStackTrace();
 		} catch (FileNotFoundException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		
