@@ -1,8 +1,0 @@
- 
-grant {
-	permission java.security.AllPermission;
-};
-  
-grant codeBase "file:/Users/arthur/Documents/Programmes/Cours/M2/Middleware/7Families-server/7Familles-Serveur/bin" {
-    permission java.security.AllPermission;
-};
