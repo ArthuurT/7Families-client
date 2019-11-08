@@ -6,7 +6,7 @@ import java.awt.GridBagLayout;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 
-import remote.IServeur;
+import remote.IServer;
 import view.composants.BoutonQuitter;
 import view.composants.BoutonSelectionServeurs;
 
@@ -16,7 +16,7 @@ public class PanneauAccueil extends JPanel {
 	private BoutonSelectionServeurs select;
 	private BoutonQuitter quitter;
 	
-	public PanneauAccueil(JFrame frame, IServeur serveur) {
+	public PanneauAccueil(JFrame frame, IServer serveur) {
 		this.quitter = new BoutonQuitter();
 		this.select = new BoutonSelectionServeurs(frame,this,serveur);
 		this.setLayout(new GridBagLayout());

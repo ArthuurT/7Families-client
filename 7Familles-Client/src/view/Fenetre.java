@@ -2,7 +2,7 @@ package view;
 
 import javax.swing.JFrame;
 
-import remote.IServeur;
+import remote.IServer;
 import view.panneau.PanneauAccueil;
 
 public class Fenetre extends JFrame {
@@ -10,7 +10,7 @@ public class Fenetre extends JFrame {
 	private static final long serialVersionUID = 1L;
 	private PanneauAccueil accueil;
 
-	public Fenetre(IServeur serveur) {
+	public Fenetre(IServer serveur) {
 			this.setTitle("7Families");
 			this.setSize(600,400);
 			this.setResizable(false);

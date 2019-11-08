@@ -8,7 +8,7 @@ import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 
-import remote.IServeur;
+import remote.IServer;
 import view.panneau.PanneauSelectionServeurs;
 
 public class BoutonSelectionServeurs extends JButton implements ActionListener{
@@ -17,9 +17,9 @@ public class BoutonSelectionServeurs extends JButton implements ActionListener{
 	
 	private JFrame frame;
 	private JPanel panel;
-	private IServeur serveur;
+	private IServer serveur;
 
-	public BoutonSelectionServeurs(JFrame frame, JPanel panel, IServeur serveur) {
+	public BoutonSelectionServeurs(JFrame frame, JPanel panel, IServer serveur) {
 		this.addActionListener(this);
 		this.setText("Selection des serveurs");
 		this.frame = frame;

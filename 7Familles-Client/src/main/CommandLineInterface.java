@@ -62,7 +62,7 @@ public class CommandLineInterface {
 		System.out.println();
 	}
 	
-	private List<Family> getSelectableFamilies(List<Card> cards) {
+	public List<Family> getSelectableFamilies(List<Card> cards) {
 		List<Family> selectableFamilies = new ArrayList<Family>();
 		for (Card card : cards) {
 			if (!selectableFamilies.contains(card.getFamily())) {
@@ -72,7 +72,7 @@ public class CommandLineInterface {
 		return selectableFamilies;
 	}
 	
-	private List<Status> getSelectableStatus(Family family, List<Card> cards) {
+	public List<Status> getSelectableStatus(Family family, List<Card> cards) {
 		List<Status> selectableStatus = new ArrayList<Status>();
 		for (Status status : Status.values()) {
 			selectableStatus.add(status);
