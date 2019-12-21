@@ -12,7 +12,7 @@ import java.util.Properties;
 import remote.IServer;
 
 public class Launcher {
-
+	
 	public static void main(String[] args) {
 		try {
 			String rootPath = Thread.currentThread().getContextClassLoader().getResource("").getPath();
@@ -31,8 +31,8 @@ public class Launcher {
 			String serverInterface = properties.getProperty("server.interface");
 			
 			Registry registry = LocateRegistry.getRegistry(port);
-			IServer serveur = (IServer) registry.lookup(serverInterface);
-			new ThreadPlayer(serveur).start();
+			IServer server = (IServer) registry.lookup(serverInterface);
+			new ThreadPlayer(server).start();
 			
 		} catch (RemoteException | NotBoundException e) {
 			e.printStackTrace();
