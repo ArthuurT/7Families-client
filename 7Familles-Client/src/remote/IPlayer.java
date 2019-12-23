@@ -11,11 +11,11 @@ import model.Status;
 
 public interface IPlayer extends Remote {
 	
-	public String pseudo() throws RemoteException;
+	public String getPseudo() throws RemoteException;
 	
 	public void giveCard(Card card) throws RemoteException, InterruptedException;
 		
-	public void registerOpponent(IPlayer opponent) throws RemoteException;
+	public void registerOpponent(IPlayer iOpponent, IBoundedBuffer iTampon) throws RemoteException;
 	
 	public Card requestCard(Family famille, Status statut) throws RemoteException, InterruptedException;
 	

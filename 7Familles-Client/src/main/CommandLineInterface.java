@@ -14,6 +14,11 @@ import model.Card;
 import model.Family;
 import model.Status;
 
+/**
+ * 
+ * This class is used to interact with the player through the terminal.
+ * 
+ */
 public class CommandLineInterface {
 
 	private String readString(String prompt) {
@@ -135,7 +140,7 @@ public class CommandLineInterface {
 		System.out.println(" ==================== SELECTABLE Opponents ==================== ");
 		System.out.println(" ==================== ==================== ==================== ");
 		for (int opponentIndex = 0; opponentIndex < opponents.size(); opponentIndex++) {
-			System.out.println(String.format("%d - %s", opponentIndex, opponents.get(opponentIndex).pseudo()));
+			System.out.println(String.format("%d - %s", opponentIndex, opponents.get(opponentIndex).getPseudo()));
 		}
 		System.out.println();
 		
@@ -148,6 +153,15 @@ public class CommandLineInterface {
 		System.out.println();
 		
 		return opponents.get(selectedOpponentIndex);
+	}
+	
+	public int selectNumberOfPlayers() {
+		String prompt = String.format("Sélectionner le nombre de joueur dans la partie [%d, %d]", 2, 6);
+		int numberOfPlayers = this.readInt(prompt);
+		while (numberOfPlayers < 2 || numberOfPlayers > 6) {
+			numberOfPlayers = this.readInt(prompt);
+		}
+		return numberOfPlayers;
 	}
 	
 	public void printMessage(String message) {

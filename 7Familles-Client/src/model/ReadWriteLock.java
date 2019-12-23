@@ -4,6 +4,11 @@ import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
+/**
+ * 
+ * This class is used to synchronize the access to the player's information
+ *
+ */
 public class ReadWriteLock {
 	private boolean busy = false;
 	private int readerCount = 0;

@@ -7,7 +7,16 @@ import model.Card;
 import model.Family;
 import model.Player;
 import model.Status;
+import model.BoundedBuffer;
 
+/**
+ * 
+ * This class is the main class of the player. It's in charge of running the logic of the game :
+ * - picking a card
+ * - asking a card to another player
+ * - creating families
+ *
+ */
 public class ThreadPlayer extends Thread {
 
 	private IServer server;
@@ -22,80 +31,95 @@ public class ThreadPlayer extends Thread {
 	public void run() {
 		try {
 			String pseudo = this.console.readPseudo();
-			Player player = new Player(pseudo);
-			IGame game = this.server.searchGame(2, player);
-			System.out.println("Début de la partie");
-			while (!game.isGameOver()) {
+			BoundedBuffer tampon = new BoundedBuffer(20);
+			Player player = new Player(pseudo, tampon);
+			
+			int numberOfPlayers = this.console.selectNumberOfPlayers();
+
+			ThreadMessageReader messageReader = new ThreadMessageReader(tampon);
+			messageReader.start();
+			
+			IGame game = this.server.searchGame(numberOfPlayers, player, tampon);
+			
+			player.sendLocalMessage("La partie commence");
+			
+			while (true) {
 				game.waitTurnOf(player);
+				// the player can be woken up for two reasons : it's his turn or the game is over 
 				if (game.isGameOver()) {
 					break;
 				}
-				this.console.printMessage("C'est à vous de jouer");
-				boolean error = false;
-				boolean newFamilyCreated = false;
+				player.sendBroadcastMessage("C'est à moi de jouer");
+				boolean error = false; // true if the player has asked a card that the opponent did not have 
+									   // or if the card he has picked is not the card he was looking for, false otherwise
+				boolean newFamilyCreated = false; // true if the player has created a new family, false otherwise
 				while (!error && !newFamilyCreated) {
 					this.console.printCards(player.getCards());
-					if (player.getCards().size() == 0) {
-						Card carte = game.pickCard();
-						if (carte != null) {
-							player.giveCard(carte);
+					if (player.getCards().size() == 0) { // if the player's hand is empty, he picks a card and pass his turn
+						Card card = game.pickCard();
+						if (card != null) {
+							player.giveCard(card);
 							this.console.printCards(player.getCards());
 						} else {
-							this.console.printMessage("La pioche est vide...");
+							player.sendBroadcastMessage("La pioche est vide...");
 							error = true;
 						}
 					} else {
 						Family family = this.console.selectFamily(player.getCards());
 						Status status = this.console.selectFamilyMember(family, player.getCards());
 						IPlayer opponent = this.console.selectOpponent(player.getOpponents());
+						player.sendBroadcastMessage(String.format("Je demande la carte (%s, %s) à %s", family, status, opponent.getPseudo()));
 						Card card = opponent.requestCard(family, status);
-						if (card != null) {
-							this.console.printMessage(String.format("Vous avez reçu la carte (%s, %s), VOUS POUVEZ REJOUER !", card.getFamily(), card.getStatus()));
+						if (card != null) { // the opponent has the card he's looking for
+							player.sendBroadcastMessage(String.format("%s m'a donné la carte (%s, %s)", opponent.getPseudo(), family, status));
 							player.giveCard(card);
 							this.console.printCards(player.getCards());
 							newFamilyCreated = player.tryCreateFamily(card);
-							if (newFamilyCreated) {
-								this.console.printMessage(String.format("BRAVO, vous venez de réunir la famille %s", card.getFamily()));
+							if (newFamilyCreated) { // the card he received allowed him to create a family
+								player.sendBroadcastMessage(String.format("J'ai réuni la famille %s", family));
 								this.console.printCards(player.getCards());
 							}
-						} else {
-							this.console.printMessage(String.format("%s n'a pas la carte que vous avez demandé", opponent.pseudo()));
+						} else { // the opponent has not the card he's looking for
+							player.sendBroadcastMessage(String.format("%s n'a pas la carte (%s, %s)", opponent.getPseudo(), family, status));
 							error = true;
 						}
-						if (error) {
+						if (error) { // the player must pick a card if he has asked a card that the opponent did not have
+							player.sendBroadcastMessage("Je pioche une carte");
 							card = game.pickCard();
 							if (card != null) {
+								player.sendLocalMessage(String.format("Vous avez pioché la carte (%s, %s)", card.getFamily(), card.getStatus()));
 								player.giveCard(card);
 								this.console.printCards(player.getCards());
-								if (card.getFamily().equals(family) && card.getStatus().equals(status)) {
-									this.console.printMessage(String.format("Vous avez piochez la carte (%s, %s), BONNE PIOCHE !", card.getFamily(), card.getStatus()));
-									error = false;
+								if (card.getFamily().equals(family) && card.getStatus().equals(status)) { // the card he picked is the one he was looking for
+									player.sendBroadcastMessage("Bonne pioche !");
+									error = false; // if the player picked the card he was looking for, he can play again
 								} else {
-									this.console.printMessage(String.format("Vous avez piochez la carte (%s, %s), MAUVAISE PIOCHE...", card.getFamily(), card.getStatus()));
+									player.sendBroadcastMessage("Mauvaise pioche !");
 								}
 								newFamilyCreated = player.tryCreateFamily(card);
-								if (newFamilyCreated) {
-									this.console.printMessage(String.format("BRAVO, vous venez de réunir la famille %s", card.getFamily()));
+								if (newFamilyCreated) { // the card he received allowed him to create a family
+									player.sendBroadcastMessage(String.format("J'ai réuni la famille %s", family));
 									this.console.printCards(player.getCards());
 								}
 							} else {
-								this.console.printMessage("La pioche est vide...");
+								player.sendBroadcastMessage("La pioche est vide...");
 							}
 						}
 					}
 				}
 				game.nextTurn();
-				this.console.printMessage("J'ai terminé mon tour !");
+				player.sendBroadcastMessage("J'ai terminé mon tour");
 			}
-			this.console.printMessage("La partie est terminée");
+			player.sendLocalMessage("La partie est terminée");
 			if (game.isWinner(player)) {
-				this.console.printMessage("VOUS AVEZ GAGNÉ !");
+				player.sendLocalMessage("Vous avez gagné !");
 			} else {
-				this.console.printMessage("Vous avez perdu...");
+				player.sendLocalMessage("Vous avez perdu...");
 			}
+			System.exit(0);
 		} catch (Exception exception) {
-			exception.printStackTrace();
-			this.console.printError("Une erreur est survenue, la partie a été coupée...");
+			System.err.println("Une erreur est survenue, vous avez été déconnecté");
+			System.exit(1);
 		}
 	}
 }

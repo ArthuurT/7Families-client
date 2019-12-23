@@ -42,7 +42,7 @@ public class ThreadJeu extends Thread implements Runnable {
 		
 		try {
 			
-			game = this.serveur.searchGame(nombre,this.player);
+			game = this.serveur.searchGame(nombre, this.player);
 			
 		/******** MIS EN PLACE DU PLATEAU *********/
 		
