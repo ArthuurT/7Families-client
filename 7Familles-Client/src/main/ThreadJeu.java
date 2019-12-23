@@ -30,6 +30,7 @@ public class ThreadJeu extends Thread implements Runnable {
 		this.nombre = nombre;
 		this.player = player;
 		this.console = new CommandLineInterface();
+		this.frame.setAlwaysOnTop(true);
 	}
 	
 	@Override
@@ -109,6 +110,12 @@ public class ThreadJeu extends Thread implements Runnable {
 	            	Status s = status[indexStatus];
 	            	/******** Choix de l'adversaire *********/
 	            	List<IPlayer> opponentsList = player.getOpponents();
+	            	String[] opponentsName = new String[opponentsList.size()];
+	            	
+	            	for(int i = 0; i < opponentsList.size(); i++) {
+	            		opponentsName[i] = opponentsList.get(i).pseudo();
+	            	}
+	            	
 	            	IPlayer[] opponents = opponentsList.toArray(new IPlayer[opponentsList.size()]);
 	            	int indexOpponent = JOptionPane.showOptionDialog(frame,
 							"Choose the opponent", 
@@ -116,8 +123,8 @@ public class ThreadJeu extends Thread implements Runnable {
 							JOptionPane.DEFAULT_OPTION, 
 							JOptionPane.QUESTION_MESSAGE, 
 							null, 
-							opponents, 
-							opponents[0]);
+							opponentsName, 
+							opponentsName[0]);
 					IPlayer opponent = opponents[indexOpponent];
 					Card card = opponent.requestCard(family, s);
 					if (card != null) {
