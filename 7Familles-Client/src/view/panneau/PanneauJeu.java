@@ -28,6 +28,9 @@ public class PanneauJeu extends JPanel {
 	public PanneauJeu(Player player) {
 		this.player = player;
 		this.logs = new JTextArea(5,20);
+		this.logs.setLineWrap(true);
+		this.logs.setWrapStyleWord(true);
+		this.logs.setEditable(false);
 		this.hand = null;
 		this.players = null;
 		try {
@@ -74,6 +77,10 @@ public class PanneauJeu extends JPanel {
 		} catch (InterruptedException e) {
 			e.printStackTrace();
 		}
+	}
+	
+	public void appendText(String message) {
+		this.logs.append(message + "\n");
 	}
 	
 }

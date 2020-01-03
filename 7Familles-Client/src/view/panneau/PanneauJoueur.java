@@ -22,7 +22,7 @@ public class PanneauJoueur extends JPanel {
 	public PanneauJoueur(IPlayer player) throws RemoteException, InterruptedException {
 		
 		this.player = player;
-		this.name = new JLabel(player.pseudo());
+		this.name = new JLabel(player.getPseudo());
 		this.families = new JList<String>(player.getCreatedFamilies()
 						.stream()
 						.map((family) -> family.toString())

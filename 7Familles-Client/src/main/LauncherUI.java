@@ -12,7 +12,7 @@ import java.util.Properties;
 import remote.IServer;
 import view.Fenetre;
 
-public class Lauch {
+public class LauncherUI {
 	
 	public static void main(String[] args) {
 	

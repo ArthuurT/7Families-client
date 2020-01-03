@@ -20,6 +20,7 @@ import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 
 import main.ThreadJeu;
+import model.BoundedBuffer;
 import model.Player;
 import remote.IServer;
 import view.composants.BoutonBack;
@@ -97,8 +98,10 @@ public class PanneauSelectionServeurs extends JPanel{
 			public void actionPerformed(ActionEvent e) {
 				loading.setVisible(true);
 				Player j = null;
+				BoundedBuffer tampon = null;
 				try {
-					j = new Player(name.getText());
+					tampon = new BoundedBuffer(20);
+					j = new Player(name.getText(),tampon);
 				} catch (RemoteException e1) {
 					e1.printStackTrace();
 				}

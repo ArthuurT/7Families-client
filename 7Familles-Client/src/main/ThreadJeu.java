@@ -1,6 +1,5 @@
 package main;
 
-import java.rmi.RemoteException;
 import java.util.List;
 
 import javax.swing.JFrame;
@@ -42,126 +41,98 @@ public class ThreadJeu extends Thread implements Runnable {
 		
 		try {
 			
-			game = this.serveur.searchGame(nombre, this.player);
+			/******** LANCEMENT DU TAMPON DES LOGS *********/
 			
-		/******** MIS EN PLACE DU PLATEAU *********/
-		
-		SwingUtilities.invokeLater(new Runnable() {
-            public void run() {
-            	frame.getContentPane().setVisible(false);
-    			frame.getContentPane().removeAll();
-    			frame.setContentPane(new PanneauJeu(player));
-            }
-        });
-	 
-		
-		/******** BOUCLE DE JEU *********/
-		
-		while (!game.isGameOver()) {
-			game.waitTurnOf(player);
-			if (game.isGameOver()) {
-				break;
-			}
+			new ThreadMessageReaderUI(player.getMessageBuffer(),this.frame).start();
 			
-			/******** REFRESH *********/
+			/******** RECHERCHE D'UNE PARTIE *********/
+			
+			game = this.serveur.searchGame(nombre, this.player,this.player.getMessageBuffer());
+			
+			/******** MIS EN PLACE DU PLATEAU *********/
+		
 			SwingUtilities.invokeLater(new Runnable() {
 	            public void run() {
-	            	((PanneauJeu) frame.getContentPane()).updateFamilies();
-	            	((PanneauJeu) frame.getContentPane()).updateHand();
+	            	frame.getContentPane().setVisible(false);
+	    			frame.getContentPane().removeAll();
+	    			frame.setContentPane(new PanneauJeu(player));
 	            }
-	        });
+	        });			
+			
+			player.sendLocalMessage("La partie commence");
+			
+			/******** LANCEMENT DU THREAD DE REFRESH *********/
+			
+			new ThreadUpdate(this.frame).start();
+			
+			/******** BOUCLE DE JEU *********/
+			
+			while (!game.isGameOver()) {
+				game.waitTurnOf(player);
+				if (game.isGameOver()) {
+					break;
+				}
 				
-			System.out.println("C'est à vous de jouer");
-			boolean error = false;
-			boolean newFamilyCreated = false;
-			while (!error && !newFamilyCreated) {
-				if (player.getCards().size() == 0) {
-					Card carte = game.pickCard();
-					if (carte != null) {
-						player.giveCard(carte);
-					} else {
-						System.out.println("La pioche est vide...");
-						error = true;
-					}
-				} else {
-					/******** Choix de la famille *********/
-	            	List<Family> listFamilies = this.console.getSelectableFamilies(player.getCards());
-	            	Family[] families = listFamilies.toArray(new Family[listFamilies.size()]);	            	
-	            	int indexFamily = JOptionPane.showOptionDialog(frame,
-	            										"Choose the family", 
-	            										"Choose the family", 
-	            										JOptionPane.DEFAULT_OPTION, 
-	            										JOptionPane.QUESTION_MESSAGE, 
-	            										null, 
-	            										families, 
-	            										families[0]);
-	            	Family family = families[indexFamily];
-	            	/******** Choix du statut *********/
-	            	List<Status> listStatus = this.console.getSelectableStatus(family,player.getCards());
-	            	Status[] status = listStatus.toArray(new Status[listStatus.size()]);
-	            	int indexStatus = JOptionPane.showOptionDialog(frame,
-							"Choose the status", 
-							"Choose the status", 
-							JOptionPane.DEFAULT_OPTION, 
-							JOptionPane.QUESTION_MESSAGE, 
-							null, 
-							status, 
-							status[0]);
-	            	Status s = status[indexStatus];
-	            	/******** Choix de l'adversaire *********/
-	            	List<IPlayer> opponentsList = player.getOpponents();
-	            	String[] opponentsName = new String[opponentsList.size()];
-	            	
-	            	for(int i = 0; i < opponentsList.size(); i++) {
-	            		opponentsName[i] = opponentsList.get(i).pseudo();
-	            	}
-	            	
-	            	IPlayer[] opponents = opponentsList.toArray(new IPlayer[opponentsList.size()]);
-	            	int indexOpponent = JOptionPane.showOptionDialog(frame,
-							"Choose the opponent", 
-							"Choose the opponent", 
-							JOptionPane.DEFAULT_OPTION, 
-							JOptionPane.QUESTION_MESSAGE, 
-							null, 
-							opponentsName, 
-							opponentsName[0]);
-					IPlayer opponent = opponents[indexOpponent];
-					Card card = opponent.requestCard(family, s);
-					if (card != null) {
-						System.out.println(String.format("Vous avez reçu la carte (%s, %s), VOUS POUVEZ REJOUER !", card.getFamily(), card.getStatus()));
-						player.giveCard(card);
-						/******** REFRESH *********/
-						SwingUtilities.invokeLater(new Runnable() {
-				            public void run() {
-				            	((PanneauJeu) frame.getContentPane()).updateFamilies();
-				            	((PanneauJeu) frame.getContentPane()).updateHand();
-				            }
-				        });
-						newFamilyCreated = player.tryCreateFamily(card);
-						if (newFamilyCreated) {
-							System.out.println(String.format("BRAVO, vous venez de réunir la famille %s", card.getFamily()));
-							/******** REFRESH *********/
-							SwingUtilities.invokeLater(new Runnable() {
-					            public void run() {
-					            	((PanneauJeu) frame.getContentPane()).updateFamilies();
-					            	((PanneauJeu) frame.getContentPane()).updateHand();
-					            }
-					        });
+				player.sendBroadcastMessage("C'est à moi de jouer");
+				boolean error = false;
+				boolean newFamilyCreated = false;
+				while (!error && !newFamilyCreated) {
+					if (player.getCards().size() == 0) {
+						Card carte = game.pickCard();
+						if (carte != null) {
+							player.giveCard(carte);
+						} else {
+							player.sendBroadcastMessage("La pioche est vide...");
+							error = true;
 						}
 					} else {
-						System.out.println(String.format("%s n'a pas la carte que vous avez demandé", opponent.pseudo()));
-						error = true;
-					}
-					if (error) {
-						card = game.pickCard();
+						/******** Choix de la famille *********/
+		            	List<Family> listFamilies = this.console.getSelectableFamilies(player.getCards());
+		            	Family[] families = listFamilies.toArray(new Family[listFamilies.size()]);	            	
+		            	int indexFamily = JOptionPane.showOptionDialog(frame,
+		            										"Choose the family", 
+		            										"Choose the family", 
+		            										JOptionPane.DEFAULT_OPTION, 
+		            										JOptionPane.QUESTION_MESSAGE, 
+		            										null, 
+		            										families, 
+		            										families[0]);
+		            	Family family = families[indexFamily];
+		            	/******** Choix du statut *********/
+		            	List<Status> listStatus = this.console.getSelectableStatus(family,player.getCards());
+		            	Status[] status = listStatus.toArray(new Status[listStatus.size()]);
+		            	int indexStatus = JOptionPane.showOptionDialog(frame,
+								"Choose the status", 
+								"Choose the status", 
+								JOptionPane.DEFAULT_OPTION, 
+								JOptionPane.QUESTION_MESSAGE, 
+								null, 
+								status, 
+								status[0]);
+		            	Status s = status[indexStatus];
+		            	/******** Choix de l'adversaire *********/
+		            	List<IPlayer> opponentsList = player.getOpponents();
+		            	String[] opponentsName = new String[opponentsList.size()];
+		            	
+		            	for(int i = 0; i < opponentsList.size(); i++) {
+		            		opponentsName[i] = opponentsList.get(i).getPseudo();
+		            	}
+		            	
+		            	IPlayer[] opponents = opponentsList.toArray(new IPlayer[opponentsList.size()]);
+		            	int indexOpponent = JOptionPane.showOptionDialog(frame,
+								"Choose the opponent", 
+								"Choose the opponent", 
+								JOptionPane.DEFAULT_OPTION, 
+								JOptionPane.QUESTION_MESSAGE, 
+								null, 
+								opponentsName, 
+								opponentsName[0]);
+						IPlayer opponent = opponents[indexOpponent];
+						player.sendBroadcastMessage(String.format("Je demande la carte (%s, %s) à %s", family, s, opponent.getPseudo()));
+						Card card = opponent.requestCard(family, s);
 						if (card != null) {
+							player.sendBroadcastMessage(String.format("%s m'a donné la carte (%s, %s)", opponent.getPseudo(), family, s));
 							player.giveCard(card);
-							if (card.getFamily().equals(family) && card.getStatus().equals(status)) {
-								System.out.println(String.format("Vous avez piochez la carte (%s, %s), BONNE PIOCHE !", card.getFamily(), card.getStatus()));
-								error = false;
-							} else {
-								System.out.println(String.format("Vous avez piochez la carte (%s, %s), MAUVAISE PIOCHE...", card.getFamily(), card.getStatus()));
-							}
 							/******** REFRESH *********/
 							SwingUtilities.invokeLater(new Runnable() {
 					            public void run() {
@@ -171,7 +142,7 @@ public class ThreadJeu extends Thread implements Runnable {
 					        });
 							newFamilyCreated = player.tryCreateFamily(card);
 							if (newFamilyCreated) {
-								System.out.println(String.format("BRAVO, vous venez de réunir la famille %s", card.getFamily()));
+								player.sendBroadcastMessage(String.format("J'ai réuni la famille %s", family));
 								/******** REFRESH *********/
 								SwingUtilities.invokeLater(new Runnable() {
 						            public void run() {
@@ -181,25 +152,58 @@ public class ThreadJeu extends Thread implements Runnable {
 						        });
 							}
 						} else {
-							System.out.println("La pioche est vide...");
+							player.sendBroadcastMessage(String.format("%s n'a pas la carte (%s, %s)", opponent.getPseudo(), family, s));
+							error = true;
+						}
+						if (error) {
+							player.sendBroadcastMessage("Je pioche une carte");
+							card = game.pickCard();
+							if (card != null) {
+								player.sendLocalMessage(String.format("Vous avez pioché la carte (%s, %s)", card.getFamily(), card.getStatus()));
+								player.giveCard(card);
+								if (card.getFamily().equals(family) && card.getStatus().equals(status)) {
+									player.sendBroadcastMessage("Bonne pioche !");
+									error = false;
+								} else {
+									player.sendBroadcastMessage("Mauvaise pioche !");							}
+								/******** REFRESH *********/
+								SwingUtilities.invokeLater(new Runnable() {
+						            public void run() {
+						            	((PanneauJeu) frame.getContentPane()).updateFamilies();
+						            	((PanneauJeu) frame.getContentPane()).updateHand();
+						            }
+						        });
+								newFamilyCreated = player.tryCreateFamily(card);
+								if (newFamilyCreated) {
+									player.sendBroadcastMessage(String.format("J'ai réuni la famille %s", family));
+									/******** REFRESH *********/
+									SwingUtilities.invokeLater(new Runnable() {
+							            public void run() {
+							            	((PanneauJeu) frame.getContentPane()).updateFamilies();
+							            	((PanneauJeu) frame.getContentPane()).updateHand();
+							            }
+							        });
+								}
+							} else {
+								player.sendBroadcastMessage("La pioche est vide...");
+							}
 						}
 					}
 				}
+				game.nextTurn();
+				player.sendBroadcastMessage("J'ai terminé mon tour");
 			}
-			game.nextTurn();
-			System.out.println("J'ai terminé mon tour !");
-		}
-		System.out.println("La partie est terminée");
-		if (game.isWinner(player)) {
-			System.out.println("VOUS AVEZ GAGNÉ !");
-		} else {
-			System.out.println("Vous avez perdu...");
-		}
+			player.sendLocalMessage("La partie est terminée");
+			if (game.isWinner(player)) {
+				player.sendLocalMessage("Vous avez gagné !");
+			} else {
+				player.sendLocalMessage("Vous avez perdu...");
+			}
 		
 		
 		} catch (Exception exception) {
-			exception.printStackTrace();
-			System.err.println("Une erreur est survenue, la partie a été coupée...");
+			System.err.println("Une erreur est survenue, vous avez été déconnecté");
+			System.exit(1);
 		}
 		
 		
